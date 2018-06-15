@@ -1,13 +1,13 @@
 # ansible-playbook -i ~/ansible/hosts /playbooks/new-default.yml
 ---
-- hosts: defaultdevices
+- hosts: berry
   gather_facts: yes
   vars:
-    wifi_country: "US"
+    wifi_country: "DE"
     locale: "en_US.UTF-8"
     keyboard: "pc104"
     keyboard_layout: "us"
-    timezone: America/Los_Angeles
+    timezone: Europe/Berlin
     locale_options:
       # Disable Default (GB) Locale
       - regexp: "^#?en_GB.UTF-8 UTF-8"
@@ -16,22 +16,24 @@
       - regexp: "^#?en_US.UTF-8 UTF-8"
         line: "en_US.UTF-8 UTF-8"
 
-  vars_prompt:
-
-  - name: hostname
-    prompt: "please enter a hostname for your new device:"
-    private: no
-  - name: wifi_ssid
-    prompt: "please enter the WiFi SSID for your new device:"
-    private: no
-  - name: wifi_password
-    prompt: "please enter the WiFi password for your new device:"
-    private: yes
-  - name: ssh_key
-    prompt: "please enter the SSH Key for your new device:"
-    private: yes
+  pre_tasks:
+  - name: "Load env vars"
+    tags: always
+    set_fact:
+      hostname: '{{ lookup("env", "PI_HOSTNAME") }}'
+      wifi_ssid: '{{ lookup("env", "PI_WIFI_SSID") }}'
+      wifi_password: '{{ lookup("env", "PI_WIFI_PASSWORD") }}'
+      ssh_key: '{{ lookup("env", "PI_SSH") }}'
+      root_pw: '{{ lookup("env", "PI_PASS") }}'
 
   tasks:
+    # Change root pw
+    - name: Change Password
+      user:
+        name: pi
+        password: "{{ root_pw }}"
+        update_password: always
+      become: yes
 
     # Expand the filesystem
     - include: ../tasks/expand-filesystem.yml
@@ -55,7 +57,7 @@
       become: yes
       command: dpkg --configure -a
 
-    # Run apt-get update and apt-get upgrade 
+    # Run apt-get update and apt-get upgrade
     - include: ../tasks/update.yml
       tags: update
 
@@ -71,4 +73,3 @@
     - include: ../handlers/tzdata.yml
       tags: system
 
-  
