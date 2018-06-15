@@ -1,0 +1,33 @@
+# ansible-playbook -v -i ~/ansible/hosts /playbooks/setup-camera-motion.yml
+---
+- hosts: berry
+  gather_facts: yes
+
+  pre_tasks:
+  - name: "Load env vars"
+    tags: always
+    set_fact:
+      mm_whitelist_ip: '{{ lookup("env", "MM_IP_WHITELIST_RANGE") }}'
+      mm_listen: '{{ lookup("env", "MM_LISTEN") }}'
+
+  tasks:
+
+  - name: install MagicMirror
+    shell: bash -c "$(curl -sL https://raw.githubusercontent.com/MichMich/MagicMirror/master/installers/raspberry.sh)"
+    failed_when: result.rc != 0
+    register: result
+    tags:
+      - setup
+
+  - name: copy config
+    template: src=../templates/magicmirror/config.js dest=~/MagicMirror/config/config.js
+    notify:
+      - restart_mm
+      - http_200
+    tags:
+      - update
+
+  handlers:
+
+    - include: ../handlers/magicmirror.yml
+      tags: system

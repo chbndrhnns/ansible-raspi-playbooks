@@ -10,7 +10,7 @@
 #   become: false
 
 - debug:
-        msg: "Will reboot and then wait for {{ ansible_ssh_host }}:{{ ansible_ssh_port }} to come back to life"
+  msg: "Will reboot and then wait for {{ ansible_ssh_host }}:{{ ansible_ssh_port }} to come back to life"
 
 - name: reboot
   shell: sleep 2 && shutdown -r now "Ansible triggered reboot"

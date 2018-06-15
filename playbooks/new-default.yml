@@ -65,6 +65,9 @@
     - include: ../tasks/hostname.yml
       tags: setup
 
+    - include: ../tasks/install-packages.yml
+      tags: setup
+
   handlers:
 
     - include: ../handlers/reboot.yml

@@ -1,0 +1,12 @@
+- name: restart_mm
+  shell: pm2 restart MagicMirror
+  failed_when: result.rc != 0
+  register: result
+
+- name: http_200
+  uri:
+    url: localhost:8080
+  register: result
+  until: result.status == 200
+  retries: 5
+  delay: 2
