@@ -1,0 +1,4 @@
+- name: check_wifi
+  shell: "ip a | grep -E 'wlan0: .+ state UP'"
+  failed_when: result.rc != 0
+  register: result

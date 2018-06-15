@@ -73,3 +73,6 @@
     - include: ../handlers/tzdata.yml
       tags: system
 
+    - include: ../handlers/check_wifi.yml
+      tags: system
+
